@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+<!-- 
+Title [!]
+Notes [opt] 
+Item list [!]
+Effort rating [!] {quick, medium, long}
+-->
+
+ <h4>Add a new recipe to the system:</h4>
+    <form action="/recipe" method="post">
+        <input required name="title" type="text" placeholder="Title"> <br><br>
+        <input name="notes" type="text" placeholder="Notes (optional)"> <br><br>
+        <input required name="items" type="text" placeholder="Item list"> <br><br>
+
+        <select required name="effort">
+            <option>Quick</option>
+            <option>Medium</option>
+            <option>Long</option>
+        </select>
+
+        <button type="submit">Add Recipe</button>
+    </form> <br>
+<hr>
+    <form action="/view" method="post">
+        <input type="text" name="keyitems" placeholder="chicken, butter">
+        <br>
+        
+        <label for="quick">Quick</label>
+        <input type="checkbox" name="effort" id="quick" value="quick">
+        <br>
+
+        <label for="medium">Medium</label>
+        <input type="checkbox" name="effort" id="medium" value="medium">
+        <br>
+
+        <label for="long">Long</label>
+        <input type="checkbox" name="effort" id="long" value="long">
+        <br> 
+
+        <button type="submit">View</button>
+    </form>
+    <br><br>
+
+    Results:
+
+    <ul>
+        {% for recipe in recipes %}
+        <li>
+            title: {{ recipe['title'] }} <br>
+            notes: {{ recipe['notes'] }} <br>
+            effort: {{ recipe['effort'] }} <br>
+            items: {{ recipe['items'] }}
+        </li> <br>
+        {% endfor %}
+    </ul>
+
+</body>
+
+</html>
