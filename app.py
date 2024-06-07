@@ -1,39 +1,24 @@
 # ================= Imports ================= #
-from flask import Flask, render_template, request, jsonify, g
+from flask import Flask, render_template, request, jsonify, g, redirect
 import sqlite3 as sql
 
 # ================= State ================= #
+DB_RECIPE_PATH = "recipes.db"
 
 app = Flask(__name__)
 
-DB_RECIPE_PATH = "recipes.db"
+@app.before_request
+def db_connect():
+    g.db = sql.connect(DB_RECIPE_PATH)
+
+@app.teardown_request
+def db_disconnect(exception):
+    if g.db: g.db.close() 
 
 # ================= Routes ================= #
 
 @app.route("/")
 def index():
-    return render_template("index.html", recipes=[])
-
-@app.route("/recipe", methods=["POST"])
-def recipe():
-    # Get posted recipe info.
-    title = request.form.get("title")
-    notes = request.form.get("notes")
-    items = request.form.get("items")
-    effort_rating = request.form.get("effort")
-
-    # Put recipe into DB.
-    query = "INSERT INTO recipes \
-        (title,notes,items,effort) \
-        VALUES (?,?,?,?)"
-    notes_entry = notes if notes else None
-    g.db.execute(query, (title,notes_entry,items,effort_rating))
-    g.db.commit()
-        
-    return f"{title}, \"{notes}\", {items}, {effort_rating}"
-
-@app.route("/view", methods=["POST"])
-def view():
     # Retrieve recipes, filtering based
     # on desired effort levels, and any
     # key items.
@@ -65,18 +50,63 @@ def view():
             "title": row["title"],
             "notes": row["notes"],
             "items": row["items"],
-            "effort": row["effort"]
+            "effort": row["effort"],
+            "ruid": row["ruid"]
         }
         recipes_data.append(recipe)
     
-    return render_template("index.html", recipes=recipes_data)
+    return render_template("index.html", recipes=recipes_data, recipe_count=len(recipes_data)), 200
 
-# ================= Utility Functions ================= #
+@app.route("/recipe", methods=["POST", "DELETE", "PATCH"])
+def recipe():
+    match request.method:
+        case "POST":
+            # Get posted recipe info.
+            title = request.form.get("title")
+            notes = request.form.get("notes")
+            items = request.form.get("items")
+            effort_rating = request.form.get("effort")
 
-@app.before_request
-def db_connect():
-    g.db = sql.connect(DB_RECIPE_PATH)
+            # Put recipe into DB.
+            query = "INSERT INTO recipes    \
+                (title,notes,items,effort)  \
+                VALUES (?,?,?,?);"
+            notes_entry = notes if notes else None
+            g.db.execute(query, (title,notes_entry,items,effort_rating))
+            g.db.commit()
+                
+            return f"{title}, \"{notes}\", {items}, {effort_rating}"
 
-@app.teardown_request
-def db_disconnect(exception):
-    if g.db: g.db.close() 
+        case "DELETE":
+            ruid = request.json.get('ruid')
+            if ruid:
+                try:
+                    g.db.execute("DELETE FROM recipes WHERE ruid=?;", (ruid,))
+                    g.db.commit()
+                    return '', 204
+                except Exception as e:
+                    return 'Failed to delete recipe', 500
+            else:
+                return 'No RUID specified', 400
+            
+        case "PATCH":
+            # TODO: supplying nothing for required fields, doesn't
+            # result in server error.
+
+            # Get posted recipe info.
+            title = request.json.get("title")
+            notes = request.json.get("notes")
+            items = request.json.get("items")
+            effort_rating = request.json.get("effort")
+            ruid = request.json.get("ruid")
+
+            if ruid:
+                try:
+                    query = "UPDATE recipes SET title=?,notes=?,items=?,effort=? WHERE ruid=?;"
+                    g.db.execute(query, (title,notes,items,effort_rating,ruid))
+                    g.db.commit();
+                    return '', 200
+                except Exception as e:
+                    return 'Failed to delete recipe', 500
+            else:
+                return 'No RUID specified', 400 

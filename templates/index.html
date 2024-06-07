@@ -1,62 +1,189 @@
 <!DOCTYPE html>
 <html>
 
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .hidden {
+            display: none !important; /* Ensure hidden takes precedence */
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            width: 80%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical; /* Allow only vertical resizing */
+        }
+        button {
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+        #addRecipeButton {
+            z-index: 10;
+        }
+    </style>
+</head>
+
 <body>
+    <!--  -->
 
-<!-- 
-Title [!]
-Notes [opt] 
-Item list [!]
-Effort rating [!] {quick, medium, long}
--->
+    <div id="recipeModal" class="modal hidden">
+        <div class="modal-content">
+            <form id="recipeForm">
+                <label for="recipeName">Recipe Title:</label>
+                <input type="text" id="title" name="recipeName" required>
 
- <h4>Add a new recipe to the system:</h4>
-    <form action="/recipe" method="post">
-        <input required name="title" type="text" placeholder="Title"> <br><br>
-        <input name="notes" type="text" placeholder="Notes (optional)"> <br><br>
-        <input required name="items" type="text" placeholder="Item list"> <br><br>
+                <label for="ingredients">Ingredients:</label>
+                <input id="items" name="ingredients" rows="6" required></input>
 
-        <select required name="effort">
-            <option>Quick</option>
-            <option>Medium</option>
-            <option>Long</option>
-        </select>
+                <label for="notes">Notes:</label>
+                <textarea id="notes" name="notes" rows="3"></textarea>
 
-        <button type="submit">Add Recipe</button>
-    </form> <br>
-<hr>
-    <form action="/view" method="post">
-        <input type="text" name="keyitems" placeholder="chicken, butter">
-        <br>
-        
-        <label for="quick">Quick</label>
-        <input type="checkbox" name="effort" id="quick" value="quick">
-        <br>
+                <label for="effort">Effort Rating:</label>
+                <input type="number" id="effort" name="effort" min=1 max=3 required></textarea>
 
-        <label for="medium">Medium</label>
-        <input type="checkbox" name="effort" id="medium" value="medium">
-        <br>
+                <p id="ruid" hidden></p>
 
-        <label for="long">Long</label>
-        <input type="checkbox" name="effort" id="long" value="long">
-        <br> 
+                <button id="recipe-update-btn" type="button">Submit</button>
+            </form>
+        </div>
+    </div>
 
-        <button type="submit">View</button>
-    </form>
+    <!--  -->
+    
+    <h2>PantryPal</h2>
+
+    <hr>
+
+    <button>New Recipe</button>
+    <button>Filter</button>
     <br><br>
 
-    Results:
+    Recipes ({{recipe_count}} found):
 
     <ul>
         {% for recipe in recipes %}
         <li>
-            title: {{ recipe['title'] }} <br>
-            notes: {{ recipe['notes'] }} <br>
-            effort: {{ recipe['effort'] }} <br>
-            items: {{ recipe['items'] }}
+            title: <p id="title">{{ recipe['title'] }}</p>
+            notes: <p id="notes">{{ recipe['notes'] }}</p>
+            items: <p id="items">{{ recipe['items'] }}</p>
+            effort: <p id="effort">{{ recipe['effort'] }}</p>
+            <br>
+
+            <button class="del_btn" data-value="{{recipe['ruid']}}">Remove</button>
+            <button class="edit_btn" data-value="{{recipe['ruid']}}">Edit</button>
         </li> <br>
         {% endfor %}
     </ul>
+
+    <script>
+        var deleteButtons = document.querySelectorAll('.del_btn');
+        deleteButtons.forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                if(!confirm('Are you sure you want to remove the recipe?')){
+                    return;
+                }
+
+                fetch('/recipe', { 
+                    method: 'delete', 
+                    headers: {'Content-Type': 'application/json'} ,
+                    body: JSON.stringify({ruid: button.dataset.value})
+                }).then(response => {
+                    window.location.href = '/';
+                }).catch(error => {
+                    console.error('There was a problem with the delete request:', error);
+                });
+            });
+        });
+
+        var updateBtn = document.getElementById('recipe-update-btn');
+        updateBtn.addEventListener('click', function(event) {
+            // send patch request to server @ /recipe
+            // wait for response ...
+            // hide modal
+            // Bad: error msg
+
+            var modal = document.getElementById('recipeModal');
+            var title = modal.querySelector('#title').value;
+            var notes = modal.querySelector('#notes').value;
+            var effort = modal.querySelector('#effort').value;
+            var items = modal.querySelector('#items').value;
+            var ruid = modal.querySelector('#ruid').textContent;
+
+            fetch('/recipe', {
+                method: 'patch',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    'title': title,
+                    'notes': notes,
+                    'items': items,
+                    'effort': effort,
+                    'ruid': ruid
+                }) 
+            }).then(response => {
+                modal.classList.toggle('hidden');
+                if(response.ok) {
+                    window.location.href = '/';
+                }
+            });
+        });
+
+        var editButtons = document.querySelectorAll('.edit_btn');
+        editButtons.forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                var title = button.parentNode.querySelector('#title').textContent;
+                var notes = button.parentNode.querySelector('#notes').textContent;
+                var effort = button.parentNode.querySelector('#effort').textContent;
+                var items = button.parentNode.querySelector('#items').textContent;
+
+                var form = document.getElementById('recipeForm');
+                form.querySelector('#title').value = title;
+                form.querySelector('#notes').value = notes;
+                form.querySelector('#items').value = items;
+                form.querySelector('#effort').value = effort;
+                form.querySelector('#ruid').textContent = button.dataset.value;
+
+                var modal = document.getElementById('recipeModal');
+                modal.classList.toggle('hidden');
+            });
+        });
+
+        document.getElementById('recipeModal').addEventListener('mousedown', function(event) {
+            if (event.target === this) {
+                this.classList.add('hidden');
+            }
+        });
+    </script>
 
 </body>
 
