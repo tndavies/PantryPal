@@ -1,11 +1,13 @@
 # ================= Imports ================= #
-from flask import Flask, render_template, request, jsonify, g, redirect
+from flask import Flask, render_template, request, jsonify, g, redirect, json
 import sqlite3 as sql
+from flask_cors import CORS
 
 # ================= State ================= #
 DB_RECIPE_PATH = "recipes.db"
 
 app = Flask(__name__)
+CORS(app)
 
 @app.before_request
 def db_connect():
@@ -17,17 +19,21 @@ def db_disconnect(exception):
 
 # ================= Routes ================= #
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def index():
     # Retrieve recipes, filtering based
     # on desired effort levels, and any
     # key items.
     query = "SELECT * from recipes"
-    efforts = request.form.getlist("effort")
-    keyitems_string = request.form.get("keyitems")
+   
+    efforts = request.args.get("efforts")
+    keyitems_string = request.args.get("keyitems")
 
     if efforts:
-        foo = [f"'{x}'" for x in request.form.getlist("effort")]
+        foo = []
+        temp_mapping = {'quick': '1', 'medium': '2', 'long': '3'}
+        for key,val in json.loads(efforts).items():
+            if val: foo.append(temp_mapping.get(key))
         filter = ",".join(foo)
         query += f" WHERE effort IN ({filter})"
     
@@ -55,7 +61,8 @@ def index():
         }
         recipes_data.append(recipe)
     
-    return render_template("index.html", recipes=recipes_data, recipe_count=len(recipes_data)), 200
+    # return render_template("index.html", recipes=recipes_data, recipe_count=len(recipes_data)), 200
+    return jsonify(recipes_data);
 
 @app.route("/recipe", methods=["POST", "DELETE", "PATCH"])
 def recipe():
@@ -82,7 +89,7 @@ def recipe():
             if ruid:
                 try:
                     g.db.execute("DELETE FROM recipes WHERE ruid=?;", (ruid,))
-                    g.db.commit()
+                    # g.db.commit()
                     return '', 204
                 except Exception as e:
                     return 'Failed to delete recipe', 500
