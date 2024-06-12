@@ -7,13 +7,13 @@ export default function App() {
   const [recipes, SetRecipes] = useState([]);
 
   useEffect(() => {
-    fetch('http://localhost:5000')
-      .then((res) => {
+      fetch('http://localhost:5000')
+      .then(res => {
         if (res.ok) {
           return res.json();
         }
       })
-      .then((data) => {
+      .then(data => {
         SetRecipes(data);
       });
   }, []);

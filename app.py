@@ -69,27 +69,42 @@ def recipe():
     match request.method:
         case "POST":
             # Get posted recipe info.
-            title = request.form.get("title")
-            notes = request.form.get("notes")
-            items = request.form.get("items")
-            effort_rating = request.form.get("effort")
+            title = request.json.get("title")
+            notes = request.json.get("notes")
+            items = request.json.get("items")
+            effort_rating = request.json.get("effort")
 
             # Put recipe into DB.
             query = "INSERT INTO recipes    \
-                (title,notes,items,effort)  \
-                VALUES (?,?,?,?);"
+                    (title,notes,items,effort)  \
+                    VALUES (?,?,?,?);"
             notes_entry = notes if notes else None
-            g.db.execute(query, (title,notes_entry,items,effort_rating))
-            g.db.commit()
+            try:
+                g.db.execute(query, (title,notes_entry,items,effort_rating))
+                g.db.commit()
+            
+                cursor = g.db.execute("SELECT last_insert_rowid();")
+                ruid = cursor.fetchone()[0]
                 
-            return f"{title}, \"{notes}\", {items}, {effort_rating}"
+                new_recipe = {
+                    'title': title,
+                    'notes': notes,
+                    'items': items,
+                    'effort': effort_rating,
+                    'ruid': ruid
+                }
+                
+                return jsonify(new_recipe), 200
 
+            except Exception as e:
+                return '', 400
+            
         case "DELETE":
             ruid = request.json.get('ruid')
             if ruid:
                 try:
                     g.db.execute("DELETE FROM recipes WHERE ruid=?;", (ruid,))
-                    # g.db.commit()
+                    g.db.commit()
                     return '', 204
                 except Exception as e:
                     return 'Failed to delete recipe', 500

@@ -1,6 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import RecipeModal from "./RecipeModal";
 
 export default function SideBar(props) {
+    const [modal, SetModal] = useState(false);
+
     const [quick, SetQuick] = useState(true);
     const [medium, SetMedium] = useState(true);
     const [long, SetLong] = useState(true);
@@ -9,7 +12,7 @@ export default function SideBar(props) {
         return "btn effort-btn" + (buttonState ? " chosen" : "");
     };
 
-    const submit = () => {
+    const filter = () => {
         const keywords = document.getElementById("keywords_field").value;
         
         let filters = new URLSearchParams();
@@ -22,18 +25,21 @@ export default function SideBar(props) {
               return res.json();
             }
           })
-          .then((data) => {
-            const SetRecipes = props.SetRecipes;
-            console.log(data);
-            SetRecipes(data);
-          });
+          .then(data => props.SetRecipes(data));
     };
 
     return (
        <>
+        {modal && <RecipeModal btnLabel="Add" requestMethod="POST" stateFunc={SetModal}/>}
+
         <div id="sidebar">
                 <label id="sidebar-title">PantryPal</label>
                 <div id="sidebar-break" />
+
+                <label className="sidebar-subtitle">Add a Recipe</label>
+                <button type="button" onClick={()=>SetModal(true)} className="btn filter-btn">New Recipe</button>
+                <br />
+                <br />
 
                 <label className="sidebar-subtitle">Filter Recipes</label>
                 <input type="text" className="form-control" id="keywords_field" placeholder="keywords"></input>
@@ -44,7 +50,7 @@ export default function SideBar(props) {
                     <button type="button" onClick={()=>{SetLong(!long);}} className={getEffortBtnStyle(long)}>Long</button>
                 </div>
 
-                <button type="button" onClick={submit} className="btn filter-btn">Filter</button>
+                <button type="button" onClick={filter} className="btn filter-btn">Filter</button>
 
             </div>
         </>

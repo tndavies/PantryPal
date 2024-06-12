@@ -14,7 +14,7 @@ body {
     color: white; /* Text color */
     padding: 10px; /* Padding to give some space around content */
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Add shadow for depth */
-    z-index: 1000; /* Ensure the sidebar stays above other content */
+    z-index: 500; /* Ensure the sidebar stays above other content */
     text-align: center;
 }
 
