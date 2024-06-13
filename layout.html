@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+
+    <style>
+      * {
+        padding: 0px;
+        margin: 0px;
+      }
+
+      body {
+        position: relative;
+        left: 0px;
+        top: 0px;
+
+        width: 100vw;
+        height: 100vh;
+
+        display: flex;
+        flex-direction: row;
+        justify-content: left;
+      }
+
+      nav {
+        width: 18%;
+        height: 100%;
+        background-color: black;
+        color: whitesmoke;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      .container {
+        background-color: brown;
+        height: 100%;
+        flex-grow: 1;
+
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+        grid-auto-rows: 360px;
+        gap: 10px 15px;
+
+        justify-items: center;
+        align-items: center;
+
+        overflow-y: scroll;
+      }
+
+      .card {
+        background-color: chocolate;
+
+        width: 230px;
+        height: 330px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <nav>
+      PantryPal
+      <hr />
+      Filter Recipes<br />
+      <input /> <br />
+      <button>Search</button>
+      <hr />
+      <button>New Recipe</button>
+    </nav>
+
+    <div class="container">
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+      <div class="card"></div>
+    </div>
+  </body>
+</html>
