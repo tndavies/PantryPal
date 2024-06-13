@@ -9,16 +9,12 @@ export default function RecipeDisplay(props) {
          <div id="content">
             <div id="cards-container">
             {
-                props.recipes.map((recipe,k) => {
+                props.recipes.map((recipe,idx) => {
                     return <RecipeCard 
-                        key={k}
-                        arrayID={k}
-                        title={recipe.title} 
-                        notes={recipe.notes} 
-                        items={recipe.items} 
-                        effort={recipe.effort} 
-                        ruid={recipe.ruid}
+                        key={recipe.ruid}
                         SetRecipes={props.SetRecipes}
+                        recipeInfo={recipe}
+                        arrayID={idx}
                     />
                 })
             }

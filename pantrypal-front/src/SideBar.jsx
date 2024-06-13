@@ -30,7 +30,15 @@ export default function SideBar(props) {
 
     return (
        <>
-        {modal && <RecipeModal btnLabel="Add" requestMethod="POST" stateFunc={SetModal}/>}
+        {modal && 
+          <RecipeModal 
+            btnLabel="Add" 
+            requestMethod="POST" 
+            stateFunc={SetModal}
+            SetRecipes={props.SetRecipes}
+            recipeInfo={{}}
+          />
+        }
 
         <div id="sidebar">
                 <label id="sidebar-title">PantryPal</label>

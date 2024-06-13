@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import RecipeDisplay from "./RecipeDisplay";
 import SideBar from "./SideBar";
-import RecipeModal from "./RecipeModal";
 
 export default function App() {
   const [recipes, SetRecipes] = useState([]);
@@ -18,6 +17,7 @@ export default function App() {
       });
   }, []);
 
+  
   return (
     <>
       <div id="container">

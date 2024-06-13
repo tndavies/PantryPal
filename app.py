@@ -126,8 +126,10 @@ def recipe():
                 try:
                     query = "UPDATE recipes SET title=?,notes=?,items=?,effort=? WHERE ruid=?;"
                     g.db.execute(query, (title,notes,items,effort_rating,ruid))
-                    g.db.commit();
-                    return '', 200
+                    g.db.commit()
+
+                    return request.json, 200
+                            
                 except Exception as e:
                     return 'Failed to delete recipe', 500
             else:
