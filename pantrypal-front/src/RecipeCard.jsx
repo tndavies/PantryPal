@@ -7,6 +7,9 @@ export default function RecipeCard(props) {
 
   //
   const deleteRecipe = () => {
+    const userCheck = confirm("Are you sure you wish to delete this recipe?");
+    if (!userCheck) return;
+
     fetch("http://localhost:5000/recipe", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -34,6 +37,19 @@ export default function RecipeCard(props) {
     });
   };
 
+  const getFooterCol = () => {
+    switch (effort) {
+      case 1:
+        return "effort-quick";
+      case 2:
+        return "effort-medium";
+      case 3:
+        return "effort-long";
+      default:
+        return "";
+    }
+  };
+
   return (
     <>
       {modal && (
@@ -47,26 +63,28 @@ export default function RecipeCard(props) {
         />
       )}
 
-      <div className="card">
-        <div className="card-title">{title}</div>
-        <div className="card-notes">{notes}</div>
-        <div className="card-items">{items}</div>
-        <div className="card-effort">{effort}</div>
+      <div className="card" onClick={()=>{SetModal(true)}}>
+        <div className="card-header">
+          <h1>{title}</h1>
 
-        <div className="card-thumbnail" />
+          <span className="card-btns">
+            <div
+              className="delBtn fa-regular fa-trash-can fa-lg"
+              onClick={deleteRecipe}
+            />
+          </span>
+        </div>
+        
+        <div className="card-main">
+          <div className="card-notes">{notes}</div>
+          <div className="card-thumbnail">
+            <img src='https://images.pexels.com/photos/376464/pexels-photo-376464.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1' />
+          </div>
+        </div>
 
-        <div className="card-btnContainer">
-          <button
-            className="card-btn edit-btn"
-            type="button"
-            onClick={() => SetModal(true)}
-          >
-            Edit
-          </button>
-
-          <button className="card-btn del-btn" type="button" onClick={deleteRecipe}>
-            Delete
-          </button>
+        <div className="card-footer">
+          <div className="card-items">{items}</div>
+          <div className={"card-bar " + getFooterCol()} />
         </div>
       </div>
     </>

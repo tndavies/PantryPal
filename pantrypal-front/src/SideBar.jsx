@@ -8,19 +8,15 @@ export default function SideBar(props) {
   const [medium, SetMedium] = useState(true);
   const [long, SetLong] = useState(true);
 
-  const getEffortBtnStyle = (buttonState) => {
-    return "btn effort-btn" + (buttonState ? " chosen" : "");
-  };
-
   const filter = () => {
     const keywords = document.getElementById("keywords_field").value;
 
     let filters = new URLSearchParams();
     filters.append("keyitems", keywords);
-    filters.append(
-      "efforts",
-      JSON.stringify({ quick: quick, medium: medium, long: long })
-    );
+    // filters.append(
+    //   "efforts",
+    //   JSON.stringify({ quick: quick, medium: medium, long: long })
+    // );
 
     fetch(`http://localhost:5000?${filters.toString()}`)
       .then((res) => {
@@ -44,61 +40,24 @@ export default function SideBar(props) {
       )}
 
       <nav>
-        <label id="sidebar-title">PantryPal</label>
-        <div id="sidebar-break" />
+        <div className="nav-title">PantryPal</div>
 
-        <label className="sidebar-subtitle">Add a Recipe</label>
-        <button
-          type="button"
-          onClick={() => SetModal(true)}
-          className="btn filter-btn"
-        >
-          New Recipe
-        </button>
-        <br />
-        <br />
+        <div className="search-container">
+          <input
+            className="nav-search"
+            placeholder="keywords"
+            id="keywords_field"
+            type="text"
+          />
+          <button className="searchBtn" onClick={filter}>Search</button>
 
-        <label className="sidebar-subtitle">Filter Recipes</label>
-        <input
-          type="text"
-          className="form-control"
-          id="keywords_field"
-          placeholder="keywords"
-        ></input>
-
-        <div>
-          <button
-            type="button"
-            onClick={() => {
-              SetQuick(!quick);
-            }}
-            className={getEffortBtnStyle(quick)}
-          >
-            Quick
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              SetMedium(!medium);
-            }}
-            className={getEffortBtnStyle(medium)}
-          >
-            Medium
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              SetLong(!long);
-            }}
-            className={getEffortBtnStyle(long)}
-          >
-            Long
-          </button>
+          <div className="fa-solid fa-filter fa-lg" />
         </div>
 
-        <button type="button" onClick={filter} className="btn filter-btn">
-          Filter
-        </button>
+        <div
+          className="newBtn fa-regular fa-square-plus fa-lg"
+          onClick={() => SetModal(true)}
+        />
       </nav>
     </>
   );
