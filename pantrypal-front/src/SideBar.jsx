@@ -8,6 +8,11 @@ export default function SideBar(props) {
   const [medium, SetMedium] = useState(true);
   const [long, SetLong] = useState(true);
 
+  const showFilterModal = (event) => {
+    event.preventDefault();
+    SetModal(true);
+  };
+
   const filter = () => {
     const keywords = document.getElementById("keywords_field").value;
 
@@ -40,24 +45,23 @@ export default function SideBar(props) {
       )}
 
       <nav>
-        <div className="nav-title">PantryPal</div>
+        <h1>PantryPal</h1>
 
-        <div className="search-container">
+        <div className="search-box">
           <input
-            className="nav-search"
             placeholder="keywords"
             id="keywords_field"
             type="text"
           />
-          <button className="searchBtn" onClick={filter}>Search</button>
-
-          <div className="fa-solid fa-filter fa-lg" />
+         
+          <button onClick={filter} onContextMenu={(e)=>showFilterModal(e)}>Search</button>
         </div>
 
-        <div
-          className="newBtn fa-regular fa-square-plus fa-lg"
-          onClick={() => SetModal(true)}
-        />
+        <div className="action-box">
+          <div className="fa-regular fa-square-plus fa-2xl" />
+          <div className="fa-regular fa-square-plus fa-2xl" onClick={()=>{SetModal(true)}}/>
+        </div>
+
       </nav>
     </>
   );
