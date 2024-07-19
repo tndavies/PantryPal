@@ -1,35 +1,23 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data.SQLite;
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json.Linq;
 
 public class Recipe
 {
+    public Recipe(int id, string title, string desc, string items, int flags)
+    {
+        ID = id;
+        Title = title;
+        Description = desc;
+        ItemsString = items;
+        Flags = flags;
+    }
+
     [Required] public string Title { get; set; }
     [Required] public string ItemsString { get; set; }
     public string Description { get; set; }
     public int Flags { get; set; }
-}
-
-public class Database
-{
-    private static string _location = "C:\\dev\\PantryPal\\new backend\\data.db";
-
-    private static SQLiteConnection EstablishConnection()
-    {
-        string ConnectionString = string.Format("Data Source={0}", _location);
-        var context = new SQLiteConnection(ConnectionString);
-        context.Open();
-
-        return context;
-    }
-
-    public static void Execute(Action<SQLiteConnection> action)
-    {
-        var DatabaseContext = EstablishConnection();
-        action(DatabaseContext);
-        DatabaseContext.Close();
-    }
+    public int ID { get; set; }
 }
 
 [Route("/recipes")]
@@ -92,8 +80,30 @@ public class RecipeManagement : ControllerBase
     }
 
     [HttpGet]
-    public string GetRecipes()
+    public List<Recipe> GetRecipes()
     {
-        return "getting recipes ...";
+        List<Recipe> recipes = new List<Recipe>();
+
+        Database.Execute((db) => 
+        { 
+            SQLiteCommand query = new SQLiteCommand(
+                "SELECT * FROM recipes;",
+                db
+            );
+
+            var DataRows = query.ExecuteReader();
+            while (DataRows.Read())
+            {
+                var ID = DataRows.GetInt32(0);
+                var Title = DataRows.GetString(1);
+                var Description = DataRows.GetString(2);
+                var ItemsString = DataRows.GetString(3);
+                var Flags = DataRows.GetInt32(4);
+
+                recipes.Add(new Recipe(ID, Title, Description, ItemsString, Flags));
+            }
+        });
+
+        return recipes;
     }
 }
